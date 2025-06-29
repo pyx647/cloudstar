@@ -1,0 +1,52 @@
+# 后端配置：使用 Netlify 的 Git Gateway 连接到你的 GitHub 仓库
+backend:
+  name: git-gateway
+  branch: main # 确保这是你的 GitHub 主分支名称，可能是 main 或 master
+
+# 媒体文件（如图片）的配置
+media_folder: "images/uploads"
+public_folder: "/images/uploads"
+
+# 内容集合配置
+collections:
+  # 集合 1: 网站全局设置
+  - name: "settings"
+    label: "网站设置"
+    # 我们在这个文件集合里，增加第二个可管理的文件
+    files:
+      - file: "_settings/site.json"
+        label: "基本信息"
+        name: "site_settings"
+        fields:
+          - { label: "网站标题", name: "title", widget: "string" }
+          - { label: "网站标语", name: "tagline", widget: "string" }
+      
+      # ================== 新增部分 START ==================
+      - file: "_data/hero.json" # 我们把首页大图的数据存在这里
+        label: "首页顶部大图"
+        name: "hero_settings"
+        fields:
+          - { label: "主标题", name: "hero_title", widget: "string", hint: "显示在图片上的大字标题" }
+          - { label: "副标题", name: "hero_subtitle", widget: "string", hint: "显示在大标题下方的小字" }
+          - { label: "背景大图", name: "hero_image", widget: "image" }
+      # ================== 新增部分 END ====================
+
+  # 集合 2: 客房管理 (保持你成功的版本)
+  - name: "rooms_list"
+    label: "客房管理"
+    label_singular: "客房列表"
+    description: "在这里管理所有的客房信息"
+    files:
+      - file: "api/rooms.json"
+        label: "客房数据"
+        name: "rooms"
+        fields:
+          - name: "rooms"
+            label: "客房列表"
+            label_singular: "客房"
+            widget: "list"
+            fields:
+              - { label: "房间名称", name: "name", widget: "string" }
+              - { label: "房间描述", name: "description", widget: "text" }
+              - { label: "价格 (每晚)", name: "price", widget: "number" }
+              - { label: "房间图片", name: "image", widget: "image" }
