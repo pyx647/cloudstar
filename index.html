@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
+    
+    <title>牧云星宿 - 感受云端之上的宁静</title>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            line-height: 1.8;
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+
+        /* Hero Section - 背景图将由JS动态设置 */
+        .hero {
+            /* 提供一个默认的背景色，以防图片加载失败 */
+            background-color: #333;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)); /* 默认的黑色遮罩层 */
+            background-size: cover;
+            background-position: center;
+            height: 60vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: #fff;
+            margin-bottom: 60px;
+            transition: background-image 0.5s ease-in-out;
+        }
+        .hero-content h1 { font-size: 3rem; margin-bottom: 1rem; font-weight: 700; }
+        .hero-content p { font-size: 1.25rem; font-weight: 400; }
+
+        main { padding-bottom: 60px; }
+        .section-title { text-align: center; font-size: 2.5rem; margin-bottom: 40px; font-weight: 700; }
+        .rooms-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; }
+        .room-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); transition: transform 0.3s ease, box-shadow 0.3s ease; display: flex; flex-direction: column; }
+        .room-card:hover { transform: translateY(-10px); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); }
+        .room-card-image img { width: 100%; height: 220px; object-fit: cover; }
+        .room-card-content { padding: 20px; flex-grow: 1; }
+        .room-card-content h3 { margin-bottom: 15px; font-size: 1.5rem; color: #0d6efd; }
+        .room-card-content p { margin-bottom: 20px; color: #6c757d; }
+        .room-card-footer { padding: 20px; border-top: 1px solid #e9ecef; background-color: #f8f9fa; }
+        .room-card-footer .price { font-size: 1.2rem; font-weight: bold; color: #dc3545; }
+        .price span { font-size: 0.9rem; color: #6c757d; font-weight: 400; }
+        .status-message { text-align: center; padding: 50px; font-size: 1.2em; grid-column: 1 / -1; }
+        .site-footer { background-color: #343a40; color: #fff; text-align: center; padding: 30px 20px; }
+        @media (max-width: 768px) {
+            .hero { height: 40vh; }
+            .hero-content h1 { font-size: 2.2rem; }
+            .hero-content p { font-size: 1rem; }
+            .section-title { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="hero">
+        <div class="hero-content">
+            <!-- 标题和标语将由JS动态填充 -->
+            <h1 id="hero-title">正在加载...</h1>
+            <p id="hero-subtitle"></p>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <h2 class="section-title">我们的客房</h2>
+            <div id="rooms-grid" class="rooms-grid">
+                <p class="status-message">正在加载客房信息...</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <p>© 2024 <span id="footer-title">牧云星宿</span>. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM 元素获取
+            const heroSection = document.querySelector('.hero');
+            const heroTitle = document.getElementById('hero-title');
+            const heroSubtitle = document.getElementById('hero-subtitle');
+            const roomsGrid = document.getElementById('rooms-grid');
+            const footerTitle = document.getElementById('footer-title');
+
+            // ================== JS 修改部分 START ==================
+            // 获取首页顶部大图的数据
+            fetch('/data/hero.json')
+                .then(response => response.ok ? response.json() : Promise.reject('Hero settings not found'))
+                .then(data => {
+                    if (data.hero_title) heroTitle.textContent = data.hero_title;
+                    if (data.hero_subtitle) heroSubtitle.textContent = data.hero_subtitle;
+                    if (data.hero_image) {
+                        // 动态设置背景图，保留遮罩层
+                        heroSection.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('${data.hero_image}')`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching hero settings:', error);
+                    // 如果获取失败，使用默认值
+                    heroTitle.textContent = "牧云星宿";
+                    heroSubtitle.textContent = "感受云端之上的宁静";
+                });
+            // ================== JS 修改部分 END ====================
+
+            // 获取网站基本信息 (用于页脚)
+            fetch('/_settings/site.json')
+                .then(response => response.ok ? response.json() : Promise.reject('Site settings not found'))
+                .then(data => {
+                    if (data.title) footerTitle.textContent = data.title;
+                })
+                .catch(error => console.error('Error fetching site settings:', error));
+
+            // 获取客房数据 (这部分逻辑不变)
+            fetch('/api/rooms.json')
+                .then(response => {
+                    if (!response.ok) throw new Error('无法加载客房数据，请确保在后台至少保存过一次“客房管理”。');
+                    return response.json();
+                })
+                .then(data => {
+                    roomsGrid.innerHTML = '';
+                    if (data.rooms && data.rooms.length > 0) {
+                        data.rooms.forEach(room => {
+                            const card = document.createElement('div');
+                            card.className = 'room-card';
+                            card.innerHTML = `
+                                <div class="room-card-image"><img src="${room.image}" alt="${room.name}"></div>
+                                <div class="room-card-content"><h3>${room.name}</h3><p>${room.description}</p></div>
+                                <div class="room-card-footer"><p class="price">¥${room.price} <span>/晚</span></p></div>
+                            `;
+                            roomsGrid.appendChild(card);
+                        });
+                    } else {
+                        roomsGrid.innerHTML = '<p class="status-message">暂无客房信息，请前往后台添加。</p>';
+                    }
+                })
+                .catch(error => {
+                    roomsGrid.innerHTML = `<p class="status-message" style="color: red;">${error.message}</p>`;
+                    console.error('Error fetching rooms:', error);
+                });
+        });
+    </script>
+</body>
+</html>
